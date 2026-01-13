@@ -5,6 +5,8 @@ pipeline {
         // These should ideally come from Jenkins Credentials
         MONGO_URI  = credentials('mongo-uri')
         SECRET_KEY = credentials('secret-key')
+        GITHUB_TOKEN = credentials('github-token')
+
     }
 
     stages {
