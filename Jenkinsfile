@@ -18,8 +18,6 @@ pipeline {
             steps {
                 sh '''
                     python --version
-                    python -m venv venv
-                    . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
@@ -29,7 +27,6 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    . venv/bin/activate
                     pytest
                 '''
             }
