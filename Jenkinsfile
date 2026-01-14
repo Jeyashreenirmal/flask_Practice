@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.12-slim'
+            args '-u root'
+        }
+    }
 
     environment {
         MONGO_URI    = credentials('mongo-uri')
@@ -12,10 +17,11 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    python3 --version
-                    python3 -m pip --version || echo "pip module not available"
-                    python3 -m pip install --user --upgrade pip
-                    python3 -m pip install --user -r requirements.txt
+                    python --version
+                    python -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                 '''
             }
         }
@@ -23,7 +29,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    export PATH=$HOME/.local/bin:$PATH
+                    . venv/bin/activate
                     pytest
                 '''
             }
@@ -32,7 +38,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "Deploy step completed"
+                    echo "Deploy stage completed"
                 '''
             }
         }
