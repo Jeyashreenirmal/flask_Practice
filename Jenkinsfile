@@ -1,14 +1,10 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.12-slim'
-            args '-u root'
-        }
-    }
+    agent any
 
     environment {
-        MONGO_URI    = credentials('mongo-uri')
-        SECRET_KEY   = credentials('secret-key')
+        // These should ideally come from Jenkins Credentials
+        MONGO_URI  = credentials('mongo-uri')
+        SECRET_KEY = credentials('secret-key')
         GITHUB_TOKEN = credentials('github-tokenn')
     }
 
@@ -17,7 +13,8 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    python --version
+                    python3 -m venv venv
+                    source venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
@@ -27,6 +24,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
+                    source venv/bin/activate
                     pytest
                 '''
             }
@@ -35,7 +33,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "Deploy stage completed"
+                    source venv/bin/activate
+                    echo "Deploying application to staging..."
+                    python app.py
                 '''
             }
         }
