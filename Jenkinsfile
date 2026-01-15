@@ -34,8 +34,7 @@ pipeline {
             steps {
                 sh '''
                     source venv/bin/activate
-                    echo "Deploying application to staging..."
-                    python app.py
+                    echo "Deploy stage placeholder (no long-running server in CI)"
                 '''
             }
         }
