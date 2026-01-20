@@ -1,0 +1,75 @@
+name: Python CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main      # for main branch pushes
+      - staging   # for staging branch pushes
+  push:
+    tags:
+      - "v*"      # for production releases like v1.0.0
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          pytest
+
+      - name: Build application
+        run: |
+          echo "Build step: preparing for deployment"
+
+  deploy-staging:
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to STAGING environment"
+          # Add your actual staging deployment commands here
+
+  deploy-production:
+    needs: build-test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to PRODUCTION environment"
+          # Add your actual production deployment commands here
